@@ -1,0 +1,13 @@
+templates
+
+# template of signup request sent from frontend
+{
+	"type":"signup",
+	"info":{
+		"userId": "Simon",
+		"password": "abc123",
+		"friends": [],
+		"email": "simon@gmail.com",
+		"phone": "1234567890"
+	}
+}
