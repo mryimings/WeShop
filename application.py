@@ -6,23 +6,35 @@ from requests_aws4auth import AWS4Auth
 
 application = Flask(__name__)
 
-AWS_ACCESS_KEY = 'AKIAJD4VHHXO4KJBT64Q'
-AWS_SECRET_KEY = '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'
+AWS_ACCESS_KEY = ''
+AWS_SECRET_KEY = ''
 region = 'us-east-1'
-service = 'es'
 
-awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, service)
+awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
 host = 'search-test-qaqcu3tpmtqedbutv744acsjm4.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
+
+es = Elasticsearch(
+    hosts=[{'host': host, 'port': 443}],
+    http_auth=awsauth,
+    use_ssl=True,
+    verify_certs=True,
+    connection_class=RequestsHttpConnection
+)
 
 
 @application.route("/", methods=['GET', 'POST'])
 def main_page():
     if request.form['type'] == 'login':
         pass
+
     elif request.form['type'] == 'signup':
-        
-        pass
+        if es.exists(index="", doc_type="", id=request.form['userId']):
+            return jsonify({'status': 'failed', 'message': 'user already exists'})
+        else:
+            es.index(index="", doc_type="", id=request.form['userId'], body=request.form['info'])
+            return jsonify({'status': 'success', 'message': 'signup succeeded'})
+
     elif request.form['type'] == 'create_event':
         pass
     elif request.form['type'] == '':
