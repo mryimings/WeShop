@@ -4,8 +4,8 @@ import random
 
 application = Flask(__name__)
 
-AWS_ACCESS_KEY = 'AKIAJD4VHHXO4KJBT64Q'
-AWS_SECRET_KEY = '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'
+AWS_ACCESS_KEY = ''
+AWS_SECRET_KEY = ''
 region = 'us-east-1'
 service = 'es'
 
