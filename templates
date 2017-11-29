@@ -1,6 +1,6 @@
 templates
 
-# template of signup request sent from frontend
+# template of signup request sent from frontend to backend
 {
 	"type":"signup",
 	"info":{
@@ -11,3 +11,16 @@ templates
 		"phone": "1234567890"
 	}
 }
+
+# template of succeeded signup sent from backend to frontend
+{
+	'status': 'success',
+	'message': 'signup succeeded'
+}
+
+# template of failed signup sent from backend to frontend
+{
+	'status': failed',
+	'message': 'user already exists'
+}
+	
