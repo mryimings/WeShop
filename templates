@@ -23,4 +23,13 @@ templates
 	'status': failed',
 	'message': 'user already exists'
 }
+
+# template of login request send from frontend to backend
+{	
+	"type": "login",
+	"info": {
+		"userId": "Simon",
+		"password": "abc123"
+	}
+}
 	
