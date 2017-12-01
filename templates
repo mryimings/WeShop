@@ -6,7 +6,6 @@ templates
 	"info":{
 		"userId": "Simon",
 		"password": "abc123",
-		"friends": [],
 		"email": "simon@gmail.com",
 		"phone": "1234567890"
 	}
