@@ -31,4 +31,14 @@ templates
 		"password": "abc123"
 	}
 }
+
+# template of add friend request from frontend to backend
+# in this case, Yaoshi send friend request to Yiwei
+{	
+	"type": "add_friend",
+	"info":{
+		"user1": "Yaoshi",
+		"user2": "Yiwei"
+	}
+}
 	
