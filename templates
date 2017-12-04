@@ -41,4 +41,22 @@ templates
 		"user2": "Yiwei"
 	}
 }
+
+# template of user2 agrees to become friend of user1
+{
+	"type": "add_friend_agree",
+	"info":{
+		"user1": "Smitha",
+		"user2": "Yiming"
+	}
+}
+
+# template of user2 declines to become friend of user1
+{
+	"type": "add_friend_decline",
+	"info":{
+		"user1": "Smitha",
+		"user2": "Yiming"
+	}
+}
 	
