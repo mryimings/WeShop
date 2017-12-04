@@ -67,9 +67,18 @@ def main_page():
             es.index(index="users", doc_type="default", id=request.form['info']['user2'], body=user_info)
             return jsonify({"status": "succeed", "message": "friend request sent"})
     elif request.form['type'] == 'add_friend_agree':  # user2 agrees to be friend with user1
-        pass
+        user_info = es.get(index="users", doc_type="default", id=request.form['info']['user2'])['_source']
+        if request.form['info']['user1'] in user_info['pending_friend_requests']:
+            user_info['pending_friend_requests'].remove(request.form['info']['user1'])
+        user_info['friends'].append(request.form['info']['user1'])
+        es.index(index="users", doc_type="default", id=request.form['info']['user2'], body=user_info)
+        return({'status': 'succ'})
+
     elif request.form['type'] == 'add_friend_decline':  # user2 declines to be friend with user1
-        pass
+        user_info = es.get(index="users", doc_type="default", id=request.form['info']['user2'])['_source']
+        if request.form['info']['user1'] in user_info['pending_friend_requests']:
+            user_info['pending_friend_requests'].remove(request.form['info']['user1'])
+        es.index(index="users", doc_type="default", id=request.form['info']['user2'], body=user_info)
 
     return render_template('main_page.html')
 
