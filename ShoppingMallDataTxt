@@ -1,0 +1,86 @@
+# coding=utf-8
+import json
+import urllib
+import time
+
+
+def googlePlace(lat, lng, radius, file_name):
+    f = open(file_name, 'a')
+    AUTH_KEY = 'PASTE THE AUTH_KEY HERE'
+    LOCATION = str(lat) + "," + str(lng)
+    RADIUS = radius
+    TYPES = 'shopping_mall'
+    MyUrl = ('https://maps.googleapis.com/maps/api/place/nearbysearch/json'
+             '?location=%s'
+             '&radius=%s'
+             '&types=%s'
+             '&sensor=false&key=%s') % (LOCATION, RADIUS, TYPES, AUTH_KEY)
+    # grabbing the JSON result
+    response = urllib.urlopen(MyUrl)
+    jsonRaw = response.read()
+    jsonData = json.loads(jsonRaw)
+    # writeData(f, jsonData['results'])
+    tmp = jsonData
+    while "next_page_token" in tmp:
+        next_page_token = tmp['next_page_token']
+        tmp = nextPage(next_page_token, AUTH_KEY)
+        while tmp['status'] == 'INVALID_REQUEST':
+            time.sleep(1)
+            tmp = nextPage(next_page_token, AUTH_KEY)
+        print '--------------------------------loop-----------------------------------------'
+        print tmp['status']
+        # writeData(f, tmp['results'])
+        jsonData['results'] += tmp['results']
+    print json.dumps(jsonData['results'], indent=4)
+    time.sleep(2)
+    f.close()
+    return jsonData
+
+
+def nextPage(next_page_token, AUTH_KEY):
+    MyUrl = ('https://maps.googleapis.com/maps/api/place/nearbysearch/json?'
+             'pagetoken=%s'
+             '&key=%s') % (next_page_token, AUTH_KEY)
+    response = urllib.urlopen(MyUrl)
+    jsonRaw = response.read()
+    jsonData = json.loads(jsonRaw)
+    return jsonData
+
+
+test = googlePlace(40.7128, -74.0060, 5000, 'ShoppingMail.txt')
+writing1 = json.dumps(test, indent=4)
+writing2 = json.dumps(test['results'], indent=4)
+t1 = open('testData1.txt', 'w')
+t2 = open('ShoppingMall.txt', 'w')
+t1.write(writing1)
+t1.close()
+t2.write(writing2)
+t2.close()
+
+
+def googleCity(lat, lng):
+    LOCATION = str(lat) + ',' + str(lng)
+    MyURL = ('https://maps.googleapis.com/maps/api/geocode/json?latlng=%s') % (LOCATION)
+    response = urllib.urlopen(MyURL)
+    jsonRaw = response.read()
+    jsonData = json.loads(jsonRaw)
+    if jsonData['status'] == 'OK':
+        CityComponent = jsonData['results'][0]['address_components']
+        City = ['', '']
+        for item in CityComponent:
+            if item['types'] == ["administrative_area_level_1", "political"]:
+                City[1] = item['long_name']
+            elif item['types'] == ["locality", "political"]:
+                City[0] = item['long_name']
+        if City[0] == '' and City[1] == '':
+            CityName = 'No City in this coordinate'
+        elif City[0] == '':
+            CityName = City[1]
+        elif City[1] == '':
+            CityName = City[0]
+        else:
+            CityName = City[0] + ', ' + City[1]
+    else:
+        CityName = 'Unknown City'
+    return CityName
+
