@@ -1,0 +1,60 @@
+import time
+import string
+import json
+from elasticsearch import Elasticsearch, RequestsHttpConnection
+from requests_aws4auth import AWS4Auth
+
+
+def uploadJson(index, doc_type, jsonData):
+    for mall in jsonData:
+        try:
+            name = mall['name']
+            print mall
+            print name
+            es.index(index=index, doc_type=doc_type, id=name, body=mall)
+        except Exception as E:
+            print E
+            continue
+
+
+def deleteJson(index, doc_type, jsonData):
+    for mall in jsonData:
+        try:
+            name = mall['name']
+            print mall
+            print name
+            es.delete(index=index, doc_type=doc_type, id=name)
+        except Exception as E:
+            print E
+            continue
+
+
+def getJson(index, doc_type, itemid):
+    try:
+        es.get(index=index, doc_type=doc_type, id=itemid)
+    except Exception as E:
+        print E
+
+
+AWS_ACCESS_KEY = 'ACCESS_KEY HERE'
+AWS_SECRET_KEY = 'ACCESS_SECRET_KEY HERE'
+region = 'us-east-1'
+
+awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
+
+host = 'search-shoppingmall-qneri4bfel2dfgjpqq453wilcq.us-east-1.es.amazonaws.com'
+
+es = Elasticsearch(
+    hosts=[{'host': host, 'port': 443}],
+    http_auth=awsauth,
+    use_ssl=True,
+    verify_certs=True,
+    connection_class=RequestsHttpConnection
+)
+f = open("DATA_FILE_NAME", "r")
+rawdata = f.read()
+jsondata = json.loads(rawdata)
+# print jsondata
+uploadJson("store", "default", jsondata)
+
+
