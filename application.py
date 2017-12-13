@@ -5,7 +5,7 @@ from requests_aws4auth import AWS4Auth
 application = Flask(__name__)
 
 AWS_ACCESS_KEY = 'j'
-AWS_SECRET_KEY = 'k'
+AWS_SECRET_KEY = 'f'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
@@ -21,12 +21,6 @@ es = Elasticsearch(
 )
 
 
-# es = Elasticsearch(
-#   hosts=[{'host': host, 'port':9200}]
-
-# )
-
-# tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images')
 
 @application.route("/", methods=['GET', 'POST', 'PUT'])
 def initial_page():
@@ -71,7 +65,10 @@ def signup():
             user_information = {}
             user_information['userId'] = signup_form['userId']
             user_information['password'] = signup_form['password']
-
+            user_information['firstname'] = signup_form['firstname']
+            user_information['lastname'] = signup_form['lastname']
+            user_information['phone'] = signup_form['phone']
+            user_information['address'] = signup_form['building']
             user_information['friends'] = []
             user_information['invited_events'] = []
             user_information['attending_events'] = []
@@ -83,5 +80,4 @@ def signup():
 
 
 if __name__ == '__main__':
-   # print es.get(index='users', doc_type='default', id='y')
      application.run()
