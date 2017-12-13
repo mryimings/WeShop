@@ -5,21 +5,27 @@ from requests_aws4auth import AWS4Auth
 application = Flask(__name__)
 
 AWS_ACCESS_KEY = 'j'
-AWS_SECRET_KEY = 'k'
+AWS_SECRET_KEY = 'p'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-test-qaqcu3tpmtqedbutv744acsjm4.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
+host = 'search-weshop-zfky4prhxjrqo6xjo74ql4eheq.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
 
 es = Elasticsearch(
-    hosts=[{'host': host, 'port': 443}],
+    hosts=[{'host': host}],
     http_auth=awsauth,
     use_ssl=True,
     verify_certs=True,
     connection_class=RequestsHttpConnection
 )
 
+#es = Elasticsearch(
+ #   hosts=[{'host': host, 'port':9200}]
+ 
+#)
+
+#tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images')
 
 @application.route("/", methods=['GET', 'POST', 'PUT'])
 def initial_page():
@@ -55,15 +61,20 @@ def login():
 def signup():
     print request.form
     if request.method == 'POST':
-        if es.exists(index="users", doc_type="default", id=request.form['userId']):
+        if es.exists(index="users", doc_type="default", id=request.form['username']):
             return jsonify({'status': 'failed', 'message': 'user already exists'})
         else:
-            user_information = request.form['info']
+            user_information['firstname'] = request.form['firstname']
+            user_information['lastname'] = request.form['lastname']
+            user_information['username'] = request.form['username']
+            user_information['password'] = request.form['password']
+            user_information['phone'] = request.form['phone']
+            user_information['address'] = request.form['building']
             user_information['friends'] = []
             user_information['invited_events'] = []
             user_information['attending_events'] = []
             user_information['pending_friend_requests'] = []
-            es.index(index="users", doc_type="default", id=request.form['userId'], body=user_information)
+            es.index(index="users", doc_type="default", id=request.form['username'], body=user_information)
             return jsonify({'status': 'success', 'message': 'signup succeeded'})
     return render_template('signup.html')
 
