@@ -78,7 +78,7 @@ def signup():
             user_information['pending_friend_requests'] = []
             es.index(index="users", doc_type="default", id=signup_form['userId'], body=user_information)
             print es.get(index='users', doc_type='default', id=signup_form['userId'])
-            return jsonify({'status': 'success', 'message': 'signup succeeded'})
+            return render_template('weshop.html')
     return render_template('signup.html')
 
 
