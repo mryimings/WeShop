@@ -4,8 +4,8 @@ from requests_aws4auth import AWS4Auth
 
 application = Flask(__name__)
 
-AWS_ACCESS_KEY = 'k'
-AWS_SECRET_KEY = 's'
+AWS_ACCESS_KEY = 'q'
+AWS_SECRET_KEY = 'a'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
