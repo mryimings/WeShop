@@ -3,23 +3,50 @@
     <title>SignUp</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="static/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
   </head>
-  <body>
+  <body bgcolor="powderblue">
     <div class="container">
       <h1>SignUp</h2>
       <br>
-      <form action="" method="post">
+       <form action="/signup" method="post" name="signup">
+        <table>
+          <tr>
+            <td>FirstName</td><td><input type="text" name="firstname"></td>
+          </tr>
+          <tr>
+            <td>LastName</td><td><input type="text" name="lastname"></td>
+          </tr>
+          <tr>
+            <td>Building#</td><td> <input type="building" name="building"></td> 
+          </tr>
+          <tr>
+            <td>Street</td><td><input type="text" name="street"></td>
+          </tr>
+          <tr>
+            <td>City</td><td><input type="text" name="city"></td>
+          </tr>
+          <tr>
+            <td>State</td><td><input type="text" name="state"></td>
+          </tr>
+          <tr>
+            <td>ZipCode</td><td><input type="text" name="zipcode"></td>
+          </tr>
+          <tr>
+            <td>UserName</td><td><input type="text" name="username"></td>
+          </tr>
+          <tr>
+            <td>Password</td><td><input type="text" name="password"></td>
+          </tr>
+          <tr>
+            <td> <input type="submit" value="SignUp" name="SignUp" id="SignUp"></td>
+          </tr>
+        </table>
+
+     
       <p>Click <a href="/">here</a> to go home.</p>
-      <input type="text" name="firstname" text="FirstName">
-      <input type="text" name="lastname" text="LastName">
-      <input type="text" name="BuildingNumber" text="BuildingNumber">
-      <input type="text" name="Street" text="Street">
-      <input type="text" name="City" text="City">
-      <input type="text" name="State" text="State">
-      <input type="text" name="ZipCode" text="ZipCode">
-      <input type="text" name="username" text="UserName">
-      <input type="password" name="password" text="Password">
-      <input type="submit" value="SignUp">
+     
       </form>
       {% if error %}
          <p class="error"><strong>Error:</strong>{{error}}
