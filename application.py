@@ -4,13 +4,13 @@ from requests_aws4auth import AWS4Auth
 
 application = Flask(__name__)
 
-AWS_ACCESS_KEY = 'AKIAIMTPCPWPEM5XYLKQ'
-AWS_SECRET_KEY = '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'
+AWS_ACCESS_KEY = 'k'
+AWS_SECRET_KEY = 's'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-weshop-zfky4prhxjrqo6xjo74ql4eheq.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
+host = 'search-test-zfky4prhxjrqo6xjo74ql4eheq.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
 
 es = Elasticsearch(
     hosts=[{'host': host, 'port': 443}],
@@ -36,19 +36,19 @@ def initial_page():
 @application.route("/login", methods=['GET', 'POST'])
 def login():
     # print request.form
-    signup_form = request.form.to_dict()
-    print signup_form
+    login_form = request.form.to_dict()
+    print login_form
     if request.method =='POST':
         print "here!"
-        if not es.exists(index="users", doc_type="default", id=signup_form['username']):
+        if not es.exists(index="users", doc_type="default", id=login_form['username']):
             print 1
             return jsonify({'status': 'failed', 'message': 'user does not exist'})
         else:
             print 2
-            user_info = es.get(index="users", doc_type="default", id=signup_form['username'])
+            user_info = es.get(index="users", doc_type="default", id=login_form['username'])
             print user_info['_source']['password']
-            print signup_form['password']
-            if user_info['_source']['password'] == signup_form['password']:
+            print login_form['password']
+            if user_info['_source']['password'] == login_form['password']:
                 return_json = user_info['_source']
                 return_json.pop('password')
                 return_json['status'] = 'success'
