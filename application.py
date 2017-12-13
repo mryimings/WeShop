@@ -4,8 +4,8 @@ from requests_aws4auth import AWS4Auth
 
 application = Flask(__name__)
 
-AWS_ACCESS_KEY = 'j'
-AWS_SECRET_KEY = 'p'
+AWS_ACCESS_KEY = 'AKIAJSBOUXMTWC2WIPVA'
+AWS_SECRET_KEY = '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'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
@@ -13,19 +13,20 @@ awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 host = 'search-weshop-zfky4prhxjrqo6xjo74ql4eheq.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
 
 es = Elasticsearch(
-    hosts=[{'host': host}],
+    hosts=[{'host': host, 'port': 443}],
     http_auth=awsauth,
     use_ssl=True,
     verify_certs=True,
     connection_class=RequestsHttpConnection
 )
 
-#es = Elasticsearch(
- #   hosts=[{'host': host, 'port':9200}]
- 
-#)
 
-#tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images')
+# es = Elasticsearch(
+#   hosts=[{'host': host, 'port':9200}]
+
+# )
+
+# tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'images')
 
 @application.route("/", methods=['GET', 'POST', 'PUT'])
 def initial_page():
@@ -59,26 +60,28 @@ def login():
 
 @application.route("/signup", methods=['GET', 'POST'])
 def signup():
-    print request.form
+    signup_form = request.form.to_dict()
     if request.method == 'POST':
-        if es.exists(index="users", doc_type="default", id=request.form['username']):
+        print "here!"
+        if es.exists(index="users", doc_type="default", id=signup_form['userId']):
+            print 1
             return jsonify({'status': 'failed', 'message': 'user already exists'})
         else:
-            user_information['firstname'] = request.form['firstname']
-            user_information['lastname'] = request.form['lastname']
-            user_information['username'] = request.form['username']
-            user_information['password'] = request.form['password']
-            user_information['phone'] = request.form['phone']
-            user_information['address'] = request.form['building']
+            print 2
+            user_information = {}
+            user_information['userId'] = signup_form['userId']
+            user_information['password'] = signup_form['password']
+
             user_information['friends'] = []
             user_information['invited_events'] = []
             user_information['attending_events'] = []
             user_information['pending_friend_requests'] = []
-            es.index(index="users", doc_type="default", id=request.form['username'], body=user_information)
+            es.index(index="users", doc_type="default", id=signup_form['userId'], body=user_information)
+            print es.get(index='users', doc_type='default', id=signup_form['userId'])
             return jsonify({'status': 'success', 'message': 'signup succeeded'})
     return render_template('signup.html')
 
 
 if __name__ == '__main__':
-    application.run()
-
+    print es.get(index='users', doc_type='default', id='y')
+    # application.run()
