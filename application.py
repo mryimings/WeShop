@@ -4,8 +4,8 @@ from requests_aws4auth import AWS4Auth
 
 application = Flask(__name__)
 
-AWS_ACCESS_KEY = 'j'
-AWS_SECRET_KEY = 'f'
+AWS_ACCESS_KEY = 'u'
+AWS_SECRET_KEY = 'j'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
@@ -58,8 +58,7 @@ def signup():
     if request.method == 'POST':
         print "here!"
         if es.exists(index="users", doc_type="default", id=signup_form['userId']):
-            print 1
-            return jsonify({'status': 'failed', 'message': 'user already exists'})
+            return render_template('signup.html', error = 'user already exists')
         else:
             print 2
             user_information = {}
