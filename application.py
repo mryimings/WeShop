@@ -1,16 +1,17 @@
 from flask import *
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
+from flask_paginate import Pagination, get_page_args
 
 application = Flask(__name__)
 
-AWS_ACCESS_KEY = 'q'
-AWS_SECRET_KEY = 'a'
+AWS_ACCESS_KEY = 't'
+AWS_SECRET_KEY = 'f'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-test-zfky4prhxjrqo6xjo74ql4eheq.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
+host = 'search-test-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
 
 es = Elasticsearch(
     hosts=[{'host': host, 'port': 443}],
@@ -27,8 +28,6 @@ def initial_page():
     print request.form
     if request.method == 'POST':
         if request.form['message'] == 'login':
-            print request.form['message']
-            print 'jjj'
             return redirect('login')
     return render_template('weshop.html')
 
@@ -42,7 +41,7 @@ def login():
         print "here!"
         if not es.exists(index="users", doc_type="default", id=login_form['username']):
             print 1
-            return jsonify({'status': 'failed', 'message': 'user does not exist'})
+            return render_template('login.html', error = 'user does not exist')
         else:
             print 2
             user_info = es.get(index="users", doc_type="default", id=login_form['username'])
@@ -53,9 +52,9 @@ def login():
                 return_json.pop('password')
                 return_json['status'] = 'success'
 
-                return jsonify(return_json)
+                return render_template('weshop.html')
             else:
-                return jsonify({'status': 'failed', 'message': 'incorrect password'})
+                return render_template('login.html', error = 'incorrect password')
     return render_template('login.html')
 
 
