@@ -5,8 +5,8 @@ from flask_paginate import Pagination, get_page_args
 
 application = Flask(__name__)
 
-AWS_ACCESS_KEY = 't'
-AWS_SECRET_KEY = 'f'
+AWS_ACCESS_KEY = 'i'
+AWS_SECRET_KEY = 'j'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
@@ -52,7 +52,7 @@ def login():
                 return_json.pop('password')
                 return_json['status'] = 'success'
 
-                return render_template('weshop.html')
+                return render_template('homepage.html')
             else:
                 return render_template('login.html', error = 'incorrect password')
     return render_template('login.html')
@@ -80,7 +80,7 @@ def signup():
             user_information['pending_friend_requests'] = []
             es.index(index="users", doc_type="default", id=signup_form['userId'], body=user_information)
             print es.get(index='users', doc_type='default', id=signup_form['userId'])
-            return render_template('weshop.html')
+            return render_template('homepage.html')
     return render_template('signup.html')
 
 
