@@ -3,7 +3,9 @@ from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 from flask_paginate import Pagination, get_page_args
 
+
 application = Flask(__name__)
+application.secret_key = 'super secret key'
 
 AWS_ACCESS_KEY = 'i'
 AWS_SECRET_KEY = 'j'
@@ -20,8 +22,6 @@ es = Elasticsearch(
     verify_certs=True,
     connection_class=RequestsHttpConnection
 )
-
-
 
 @application.route("/", methods=['GET', 'POST', 'PUT'])
 def initial_page():
@@ -80,9 +80,44 @@ def signup():
             user_information['pending_friend_requests'] = []
             es.index(index="users", doc_type="default", id=signup_form['userId'], body=user_information)
             print es.get(index='users', doc_type='default', id=signup_form['userId'])
-            return render_template('homepage.html')
+            session['curr_userid'] = signup_form['userId']
+            return redirect('/homepage')
     return render_template('signup.html')
+
+@application.route("/homepage", methods=['GET', 'POST'])
+def homepage():
+    signup_form = request.form.to_dict()
+    if request.method == 'GET':
+       if 'curr_userid' in session:
+         userid = session['curr_userid']
+       return render_template('homepage.html')
+
+@application.route("/addfriends", methods=['GET', 'POST'])
+def add_friend():
+    if request.method == 'GET':
+        all_users = es.search(index='users', body={"query":{"match_all":{}}})['hits']['hits']
+        userId_list = []
+        if 'curr_userid' in session:
+          curr_user = session['curr_userid']
+        curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
+        for user in all_users:
+            if user not in curr_friend_list:
+                userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
+        return render_template("AddFriends.html", **dict(data=userId_list))
+    if request.method == 'POST':
+        add_friend_form = request.form.to_dict()
+        curr_user = ''
+        for userId in add_friend_form:
+            user_info = es.get(index='users', doc_type='default', id=userId)['_source']
+            user_info['pending_friend_requests'].append(curr_user)
+            es.index(index='users', doc_type='default', id=userId, body=user_info)
+        return render_template('homepage.html')
+    return render_template("AddFriends.html")
+
+# @application.route("/createevents", methods=['GET', 'POST'])
 
 
 if __name__ == '__main__':
-     application.run()
+    application.run()
+    # print es.search(index='users', body={"query": {"match_all": {}}})['hits']['hits']
+
