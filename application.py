@@ -51,7 +51,7 @@ def login():
                 return_json = user_info['_source']
                 return_json.pop('password')
                 return_json['status'] = 'success'
-
+                session['curr_userid'] = login_form['username']
                 return render_template('homepage.html')
             else:
                 return render_template('login.html', error = 'incorrect password')
@@ -92,6 +92,29 @@ def homepage():
          userid = session['curr_userid']
        return render_template('homepage.html')
 
+@application.route("/viewfriendrequests", methods=['GET', 'POST'])
+def add_friend():
+    if request.method == 'GET':
+        if 'curr_userid' in session:
+          curr_user = session['curr_userid']
+        pending_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['pending_friend_requests']
+        for user in all_users:
+            if user not in pending_friend_list:
+                userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
+        return render_template("ViewPendingFriendRequest.html", **dict(data=userId_list))
+    if request.method == 'POST':
+        friendIds = request.form.getlist('FriendId')
+        if 'curr_userid' in session:
+          curr_user = session['curr_userid']
+        for userId in friendIds:
+            user_info = es.get(index='users', doc_type='default', id=userId)['_source']
+            user_info['friends'].append(curr_user)
+            es.index(index='users', doc_type='default', id=userId, body=user_info)
+        user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
+        print(user_info)
+        return render_template('homepage.html')
+    #return render_template("ViewPendingFriendRequest.html")
+
 @application.route("/addfriends", methods=['GET', 'POST'])
 def add_friend():
     if request.method == 'GET':
@@ -103,16 +126,21 @@ def add_friend():
         for user in all_users:
             if user not in curr_friend_list:
                 userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
-        return render_template("AddFriends.html", **dict(data=userId_list))
+            return render_template("AddFriends.html", **dict(data=userId_list))
     if request.method == 'POST':
-        add_friend_form = request.form.to_dict()
-        curr_user = ''
-        for userId in add_friend_form:
+        friendIds = request.form.getlist('FriendId')
+        if 'curr_userid' in session:
+          curr_user = session['curr_userid']
+        for userId in friendIds:
             user_info = es.get(index='users', doc_type='default', id=userId)['_source']
             user_info['pending_friend_requests'].append(curr_user)
             es.index(index='users', doc_type='default', id=userId, body=user_info)
+        user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
+        print(user_info)
         return render_template('homepage.html')
     return render_template("AddFriends.html")
+
+
 
 # @application.route("/createevents", methods=['GET', 'POST'])
 
