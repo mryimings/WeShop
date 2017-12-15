@@ -29,26 +29,28 @@
 <body bgcolor="F0F0F">
 <h1>Create your event</h1>
 <div id="createEventForm">
-    <form action="/createevent" method="POST" name="createevent">
-        <table>
+    <form action="create_event" method="POST" name="create_event">
+        <table border="1">
             <tr>
                 <td>Event Name:</td><td><input type="text" name="eventname"></td>
             </tr>
             <tr>
-                <td>What kind of goods you want to buy:</td><td><input type="text" name="goodskind"></td>
-            </tr>
-            <tr>
-                <td>send invitation to:</td>
-                <td>
-                    <select type="choose" name="invitelist" id="select_k1">
-                        <option value="allusers">All Users</option>
-                        <option value="friends">Friends Only</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td> <input type="submit" value="SendInvitation" name="Send Invitation" id="SendInvitation"></td>
-            </tr>
+              <td>send invitation to:</td>
+              <td>
+
+        {% for n in friend %}
+              <table>
+                  <td>{{n[0]}}</td>
+                  <td>{{n[1]}}</td>
+                  <td>{{n[2]}}</td>
+                  <td>add<input   type="checkbox"   value="add"   name="n[0]"   checked="checked"/></td>
+              </table>
+         {% endfor %}
+              </td>
+          </tr>
+          <tr>
+              <td> <input type="submit" value="SendInvitation" name="Send Invitation" id="SendInvitation"></td>
+          </tr>
         </table>
     </form>
 </div>
@@ -63,7 +65,7 @@
     }
 </script>
 <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=APIKEY_HERE&callback=initMap">
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAuy5-bTczo1PYVkSlLdIDVqB5LF1Ibyow&callback=initMap">
 </script>
 </body>
 <footer>
