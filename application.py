@@ -113,15 +113,19 @@ def homepage():
 #         print(user_info)
 #         return render_template('homepage.html')
 
-# @application.route("/viewfriends", methods=['GET', 'POST'])
-# def viewfriends():
-#     if request.method == 'GET':
-#         if 'curr_userid' in session:
-#           curr_user = session['curr_userid']
-#           friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
-#         for user in friend_list:
-#              userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
-#         return render_template("FriendList.html", **dict(data=friend_list))
+@application.route("/viewfriends", methods=['GET', 'POST'])
+def viewfriends():
+    if request.method == 'GET':
+        if 'curr_userid' in session:
+            curr_user = session['curr_userid']
+        curr_user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
+        friend_list = curr_user_info[]
+
+        for user in friend_list:
+             userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
+        return render_template("FriendList.html", **dict(friends=friend_list))
+    if request.method == 'POST':
+
    
 @application.route("/addfriends", methods=['GET', 'POST'])
 def add_friend():
@@ -157,10 +161,20 @@ def add_friend():
 
 
 
-# @application.route("/createevents", methods=['GET', 'POST'])
+@application.route("/create_event", methods=['GET', 'POST'])
+def create_event():
+    if request.method == 'GET':
+      userId_list = []
+      if 'curr_userid' in session:
+          curr_user = session['curr_userid']
+      curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
+      for user in curr_friend_list:
+              userId_list.append(
+                  [user['_id'], user['_source']['firstname'], user['_source']['lastname']])
+      print "ha"
+      return render_template("create_event.html", **dict(friend=userId_list))
 
 
 if __name__ == '__main__':
     application.run()
     # print es.get(index='users', doc_type='default', id='yiming')
-
