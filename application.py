@@ -5,13 +5,13 @@ from flask_paginate import Pagination, get_page_args
 
 application = Flask(__name__)
 
-AWS_ACCESS_KEY = 'AKIAJNB5EHZZSBU3CHTQ'
-AWS_SECRET_KEY = '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'
+AWS_ACCESS_KEY = ''
+AWS_SECRET_KEY = ''
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-weshop-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
+host = 'search-test-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
 
 es = Elasticsearch(
     hosts=[{'host': host, 'port': 443}],
