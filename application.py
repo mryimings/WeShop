@@ -93,7 +93,7 @@ def homepage():
        return render_template('homepage.html')
 
 @application.route("/viewfriendrequests", methods=['GET', 'POST'])
-def add_friend():
+def viewfriendrequests():
     if request.method == 'GET':
         if 'curr_userid' in session:
           curr_user = session['curr_userid']
