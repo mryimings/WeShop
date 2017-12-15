@@ -11,18 +11,19 @@
   <form method="post" name="AddFriends">
   <img src="/static/AddFriend.jpg" style=" width:200px;height:200px;">
   
-  <p>Add New Friend</p>
   <div>
     <table border="1">
-            
+     <tr>
+         <td><strong>Username</strong></td>
+         <td><strong>Name</strong></td>
+         <td><strong>Phone Number</strong></td>
+    </tr>      
     {% for n in data %}
      <tr>
-         <td><img src="/static/friend.jpg" alt="Friend"></td>
-         <td>{{n.userId}}</td>
-         <td>{{n.firstname}} {{n.lastname}}</td>
-         <td>{{n.phone}}</td>
-         <td>{{n.email}}</td>
-         <td><input type="checkbox" id="AddFriend" text="Add Friend"></td>
+         <td>{{n[0]}}</td>
+         <td>{{n[1]}} {{n[2]}}</td>
+         <td>{{n[3]}}</td>
+         <td><input type="checkbox" id="AddFriend" text="Add Friend" value={{n[0]}}></td>
     </tr>
     {% endfor %}
    </table>
