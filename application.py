@@ -5,8 +5,8 @@ from flask_paginate import Pagination, get_page_args
 
 application = Flask(__name__)
 
-AWS_ACCESS_KEY = 'i'
-AWS_SECRET_KEY = 'j'
+AWS_ACCESS_KEY = 'd'
+AWS_SECRET_KEY = '0'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
@@ -20,8 +20,6 @@ es = Elasticsearch(
     verify_certs=True,
     connection_class=RequestsHttpConnection
 )
-
-
 
 @application.route("/", methods=['GET', 'POST', 'PUT'])
 def initial_page():
@@ -83,6 +81,25 @@ def signup():
             return render_template('homepage.html')
     return render_template('signup.html')
 
+@application.route("/addfriends", methods=['GET', 'POST'])
+def add_friend():
+    if request.method == 'GET':
+        all_users = es.search(index='users', body={"query":{"match_all":{}}})['hits']['hits']
+        userId_list = []
+        for user in all_users:
+            userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
+        return render_template("AddFriends.html", **dict(data=userId_list))
+
+    if request.method == 'POST':
+        add_friend_form = request.form.to_dict()
+
+    return render_template("AddFriends.html")
+
+# @application.route("/createevents", methods=['GET', 'POST'])
+
 
 if __name__ == '__main__':
-     application.run()
+    application.run()
+    # print es.search(index='users', body={"query": {"match_all": {}}})['hits']['hits']
+
+
