@@ -81,7 +81,21 @@ def main_event_status():
     main_event_status_form = request.form.to_dict()
     print main_event_status_form
     if request.method == 'GET':
-        pass
+        curr_user = ''
+        if 'curr_userid' in session:
+            curr_user = session['curr_userid']
+        all_events = es.search(index='events', body={"query":{"match_all":{}}})['hits']['hits']
+        host_events = []
+        pending_events = []
+        accepted_events = []
+        for event in all_events:
+            if curr_user == event['_source']['event_host']:
+                host_events.append(event['_id'])
+            elif curr_user in event['_source']['pending_member_list']:
+                pending_events.append([event['_id'], event['_source']['location'], event['_source']['event_time']])
+            elif curr_user in event['_source']['accepted_member_list']:
+                accepted_events.append(event['_id'])               
+        return render_template('main_event_status.html', **dict(host=host_events, pending=pending_events, accepted=accepted_events))
     elif request.method == 'POST':
         pass
     return render_template('main_event_status.html')
