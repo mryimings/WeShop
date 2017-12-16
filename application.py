@@ -6,13 +6,13 @@ from requests_aws4auth import AWS4Auth
 application = Flask(__name__)
 application.secret_key = 'super secret key'
 
-AWS_ACCESS_KEY = 'AKIAJHERI2FTBN3MSV6Q'
-AWS_SECRET_KEY = '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'
+AWS_ACCESS_KEY = 'k'
+AWS_SECRET_KEY = 'C'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-weshop-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
+host = 'search-test-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
 
 es = Elasticsearch(
     hosts=[{'host': host, 'port': 443}],
