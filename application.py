@@ -166,32 +166,35 @@ def create_event():
     if request.method == 'POST':
         if 'curr_userid' in session:
             curr_user = session['curr_userid']
-        members = []
-        members.append(event_form['memberlist'])
+        members = event_form['memberlist']
+        print members
+        print type(members)
         members2 = []
         friend_members = []
         all_users = es.search(index='users', body={"query": {"match_all": {}}})['hits']['hits']
         curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
         event_information = {}
         event_information['event_name'] = event_form['eventName']
-        if es.exists(index='events', doc_type='default', id=event_information['event_name']) 
+        if es.exists(index='events', doc_type='default', id=event_information['event_name']):
             return render_template('create_event.html', error='event already exists')
         event_information['event_time'] = event_form['eventTime']
-        event_information['member_list'] = members
         event_information['event_host'] = curr_user
         event_information['location'] = []
-        if (members[-1] == "alluser"):
+        event_information['accepted_member_list'] = []
+        print 'linyihan'
+        if members[-1] == "alluser":
             for i in range(len(members) - 1):
                 friend_members.append(members[i])
-            members2.append(friend_members)
+            members2 = [x for x in friend_members]
             for user in all_users:
                 user = user['_id']
                 if user not in curr_friend_list:
                     if user != curr_user:
-                        members2.append([user])
+                        members2.append(user)
                         event_information['pending_member_list'] = members2
-        else :
+        else:
             event_information['pending_member_list'] = members
+        event_information['member_list'] = event_information['pending_member_list']
 
         es.index(index="events", doc_type="default", id=event_form['eventName'], body=event_information)
         print es.get(index='events', doc_type='default', id=event_form['eventName'])
