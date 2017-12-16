@@ -1,18 +1,18 @@
 from flask import *
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
-# from flask_paginate import Pagination, get_page_args
+
 
 application = Flask(__name__)
 application.secret_key = 'super secret key'
 
-AWS_ACCESS_KEY = 'heihei'
-AWS_SECRET_KEY = 'haha'
+AWS_ACCESS_KEY = 'AKIAJHERI2FTBN3MSV6Q'
+AWS_SECRET_KEY = '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'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-test-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
+host = 'search-weshop-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
 
 es = Elasticsearch(
     hosts=[{'host': host, 'port': 443}],
@@ -91,69 +91,59 @@ def homepage():
          userid = session['curr_userid']
        return render_template('homepage.html')
 
-# @application.route("/viewfriendrequests", methods=['GET', 'POST'])
-# def viewfriendrequests():
-#     if request.method == 'GET':
-#         if 'curr_userid' in session:
-#           curr_user = session['curr_userid']
-#         pending_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['pending_friend_requests']
-#         for user in all_users:
-#             if user not in pending_friend_list:
-#                 userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
-#         return render_template("ViewPendingFriendRequest.html", **dict(data=userId_list))
-#     if request.method == 'POST':
-#         friendIds = request.form.getlist('FriendId')
-#         if 'curr_userid' in session:
-#           curr_user = session['curr_userid']
-#         for userId in friendIds:
-#             user_info = es.get(index='users', doc_type='default', id=userId)['_source']
-#             user_info['friends'].append(curr_user)
-#             es.index(index='users', doc_type='default', id=userId, body=user_info)
-#         user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
-#         print(user_info)
-#         return render_template('homepage.html')
+@application.route("/viewfriendrequests", methods=['GET', 'POST'])
+def viewfriendrequests():
+    if request.method == 'GET':
+        if 'curr_userid' in session:
+          curr_user = session['curr_userid']
+        pending_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['pending_friend_requests']
+        for user in all_users:
+            if user not in pending_friend_list:
+                userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
+        return render_template("ViewPendingFriendRequest.html", **dict(data=userId_list))
+    if request.method == 'POST':
+        friendIds = request.form.getlist('FriendId')
+        if 'curr_userid' in session:
+          curr_user = session['curr_userid']
+        for userId in friendIds:
+            user_info = es.get(index='users', doc_type='default', id=userId)['_source']
+            user_info['friends'].append(curr_user)
+            es.index(index='users', doc_type='default', id=userId, body=user_info)
+        user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
+        print(user_info)
+        return render_template('homepage.html')
 
 @application.route("/viewfriends", methods=['GET', 'POST'])
 def viewfriends():
     if request.method == 'GET':
         if 'curr_userid' in session:
-            curr_user = session['curr_userid']
-        curr_user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
-        friend_list = curr_user_info[]
-
+          curr_user = session['curr_userid']
+          friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
         for user in friend_list:
              userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
-        return render_template("FriendList.html", **dict(friends=friend_list))
-    if request.method == 'POST':
-
+        return render_template("FriendList.html", **dict(data=friend_list))
    
 @application.route("/addfriends", methods=['GET', 'POST'])
 def add_friend():
     if request.method == 'GET':
         all_users = es.search(index='users', body={"query":{"match_all":{}}})['hits']['hits']
-        print all_users
         userId_list = []
         if 'curr_userid' in session:
-            curr_user = session['curr_userid']
+          curr_user = session['curr_userid']
         curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
-        print "curr_friend_list", curr_friend_list
         for user in all_users:
-            if user not in curr_friend_list:
-                userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
+            if user['_id'] not in curr_friend_list:
+                if user['_id'] != curr_user:
+                    userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
         return render_template("AddFriends.html", **dict(data=userId_list))
     if request.method == 'POST':
         friendIds = request.form.getlist('FriendId')
-        print friendIds
         if 'curr_userid' in session:
-            curr_user = session['curr_userid']
+          curr_user = session['curr_userid']
         for userId in friendIds:
-            print 5, userId
             user_info = es.get(index='users', doc_type='default', id=userId)['_source']
-            print 6, user_info
             user_info['pending_friend_requests'].append(curr_user)
-            print 7, user_info
             es.index(index='users', doc_type='default', id=userId, body=user_info)
-            print 8, es.get(index='users', doc_type='default', id=userId)
         user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
         print(user_info)
         return render_template('homepage.html')
@@ -163,18 +153,52 @@ def add_friend():
 
 @application.route("/create_event", methods=['GET', 'POST'])
 def create_event():
+    event_form = request.form.to_dict()
     if request.method == 'GET':
-      userId_list = []
-      if 'curr_userid' in session:
-          curr_user = session['curr_userid']
-      curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
-      for user in curr_friend_list:
+        userId_list = []
+        if 'curr_userid' in session:
+            curr_user = session['curr_userid']
+        curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
+        for user in curr_friend_list:
               userId_list.append(
                   [user['_id'], user['_source']['firstname'], user['_source']['lastname']])
-      print "ha"
-      return render_template("create_event.html", **dict(friend=userId_list))
+        print "ha"
+        return render_template("create_event.html", **dict(friend=userId_list))
+    if request.method == 'POST':
+        print "here!"
+        if 'curr_userid' in session:
+            curr_user = session['curr_userid']
+        members = []
+        members.append(event_form['memberlist'])
+        members2 = []
+        friend_members = []
+        all_users = es.search(index='users', body={"query": {"match_all": {}}})['hits']['hits']
+        curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
+        event_information = {}
+        event_information['event_name'] = event_form['eventName']
+        event_information['event_time'] = event_form['eventTime']
+        event_information['member_list'] = members
+        event_information['event_host'] = curr_user
+        event_information['location'] = []
+        if (members[-1] == "alluser"):
+            for i in range(len(members) - 1):
+                friend_members.append(members[i])
+            members2.append(friend_members)
+            for user in all_users:
+                user = user['_id']
+                if user not in curr_friend_list:
+                    if user != curr_user:
+                        members2.append([user])
+                        event_information['pending_member_list'] = members2
+        else :
+            event_information['pending_member_list'] = members
 
+        es.index(index="events", doc_type="default", id=event_form['eventName'], body=event_information)
+        print es.get(index='events', doc_type='default', id=event_form['eventName'])
+        return redirect('/homepage')
+    return render_template('create_event.html')
 
 if __name__ == '__main__':
     application.run()
-    # print es.get(index='users', doc_type='default', id='yiming')
+    # print es.search(index='users', body={"query": {"match_all": {}}})['hits']['hits']
+
