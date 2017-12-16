@@ -94,10 +94,23 @@ def main_event_status():
             elif curr_user in event['_source']['pending_member_list']:
                 pending_events.append([event['_id'], event['_source']['location'], event['_source']['event_time']])
             elif curr_user in event['_source']['accepted_member_list']:
-                accepted_events.append(event['_id'])               
+                accepted_events.append(event['_id'])
         return render_template('main_event_status.html', **dict(host=host_events, pending=pending_events, accepted=accepted_events))
     elif request.method == 'POST':
-        pass
+        decision_dict = request.form.to_dict()
+        print decision_dict
+        curr_user = ''
+        if 'curr_userid' in session:
+            curr_user = session['curr_userid']
+        curr_user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
+        for event_id in decision_dict:
+            curr_user_info['invited_events'].remove(event_id)
+            curr_event_info = es.get(index='events', doc_type='default', id=event_id)['_source']
+            curr_event_info['pending_member_list'].remove(curr_user)
+            if decision_dict[event_id] == 'yes':
+                curr_user_info['attending_events'].append(event_id)
+                curr_event_info['accepted_member_list'].append(curr_user)
+
     return render_template('main_event_status.html')
 
 @application.route("/homepage", methods=['GET', 'POST'])
