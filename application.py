@@ -84,50 +84,41 @@ def homepage():
             userid = session['curr_userid']
         return render_template('homepage.html')
 
-# @application.route("/viewfriendrequests", methods=['GET', 'POST'])
-# def viewfriendrequests():
-#     if request.method == 'GET':
-#         if 'curr_userid' in session:
-#           curr_user = session['curr_userid']
-#         pending_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['pending_friend_requests']
-#         for user in all_users:
-#             if user not in pending_friend_list:
-#                 userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
-#         return render_template("ViewPendingFriendRequest.html", **dict(data=userId_list))
-#     if request.method == 'POST':
-#         friendIds = request.form.getlist('FriendId')
-#         if 'curr_userid' in session:
-#           curr_user = session['curr_userid']
-#         for userId in friendIds:
-#             user_info = es.get(index='users', doc_type='default', id=userId)['_source']
-#             user_info['friends'].append(curr_user)
-#             es.index(index='users', doc_type='default', id=userId, body=user_info)
-#         user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
-#         print(user_info)
-#         return render_template('homepage.html')
-#
-# @application.route("/viewfriends", methods=['GET', 'POST'])
-# def viewfriends():
-#     if request.method == 'GET':
-#         if 'curr_userid' in session:
-#           curr_user = session['curr_userid']
-#           friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
-#         for user in friend_list:
-#              userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
-#         return render_template("FriendList.html", **dict(data=friend_list))
+@application.route("/viewfriendrequests", methods=['GET', 'POST'])
+def viewfriendrequests():
+    if request.method == 'GET':
+        if 'curr_userid' in session:
+          curr_user = session['curr_userid']
+        pending_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['pending_friend_requests']
+        for user in all_users:
+            if user not in pending_friend_list:
+                userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
+        return render_template("ViewPendingFriendRequest.html", **dict(data=userId_list))
+    if request.method == 'POST':
+        friendIds = request.form.getlist('FriendId')
+        if 'curr_userid' in session:
+          curr_user = session['curr_userid']
+        for userId in friendIds:
+            user_info = es.get(index='users', doc_type='default', id=userId)['_source']
+            user_info['friends'].append(curr_user)
+            es.index(index='users', doc_type='default', id=userId, body=user_info)
+        user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
+        print(user_info)
+        return render_template('homepage.html')
+
+@application.route("/viewfriends", methods=['GET', 'POST'])
+def viewfriends():
+    if request.method == 'GET':
+        if 'curr_userid' in session:
+          curr_user = session['curr_userid']
+          friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
+        for user in friend_list:
+             userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
+        return render_template("FriendList.html", **dict(data=friend_list))
    
 @application.route("/addfriends", methods=['GET', 'POST'])
 def add_friend():
     if request.method == 'GET':
-    #     all_users = es.search(index='users', body={"query":{"match_all":{}}})['hits']['hits']
-    #     userId_list = []
-    #     if 'curr_userid' in session:
-    #         curr_user = session['curr_userid']
-    #     curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
-    #     for user in all_users:
-    #         if user['_id'] not in curr_friend_list:
-    #             if user['_id'] != curr_user:
-    #                 userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
 
         all_users = es.search(index='users', body={"query": {"match_all": {}}})['hits']['hits']
         # print all_users
@@ -209,5 +200,5 @@ def create_event():
 
 if __name__ == '__main__':
     application.run()
-    # print es.search(index='users', body={"query": {"match_all": {}}})['hits']['hits']
+
 
