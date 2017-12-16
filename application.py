@@ -150,11 +150,10 @@ def add_friend():
         return render_template('homepage.html')
     return render_template("AddFriends.html")
 
-
-
 @application.route("/create_event", methods=['GET', 'POST'])
 def create_event():
     event_form = request.form.to_dict()
+    print event_form
     if request.method == 'GET':
         userId_list = []
         if 'curr_userid' in session:
@@ -165,7 +164,6 @@ def create_event():
         print "ha"
         return render_template("create_event.html", **dict(friend=userId_list))
     if request.method == 'POST':
-        print "here!"
         if 'curr_userid' in session:
             curr_user = session['curr_userid']
         members = []
@@ -176,6 +174,8 @@ def create_event():
         curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
         event_information = {}
         event_information['event_name'] = event_form['eventName']
+        if es.exists(index='events', doc_type='default', id=event_information['event_name']) 
+            return render_template('create_event.html', error='event already exists')
         event_information['event_time'] = event_form['eventTime']
         event_information['member_list'] = members
         event_information['event_host'] = curr_user
