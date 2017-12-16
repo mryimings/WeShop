@@ -72,13 +72,69 @@
 <div id="map"></div>
 <script>
     function initMap() {
-        var newyork = {lat: 40.78, lng: -73.90};
+        var newyork = {lat: 40.8075355, lng: -73.96257270000001};
         var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 10,
+            zoom: 12,
             center: newyork
         });
+        map.addListener('click', function(event) {
+            coor = {"lat": event.latLng.lat(),"lng":event.latLng.lng()};
+            send_coor(coor);
+            var res1 = document.getElementById('result');
+            res1.innerHTML = JSON.stringify(coor);
+        });
     }
+
+    function send_coor(data_received) {
+        var req_coor = new XMLHttpRequest();
+
+        var res2 = document.getElementById('result2');
+        var dict_data={};
+        req_coor.onreadystatechange = function()
+        {
+            if(this.readyState == 4 && this.status == 200) {
+                var resText = this.responseText;
+                dict_data = JSON.parse(resText);
+                res2.innerHTML = JSON.stringify(dict_data);
+                var markerList = new Array(dict_data["backendcoor"].length);
+                var windowList = new Array(dict_data["backendcoor"].length);
+                for(var i = 0;i<dict_data["backendcoor"].length;i++) {
+                    markerList[i] = new google.maps.Marker({
+                        position: {
+                            lat: dict_data["backendcoor"][i]["lat"],
+                            lng: dict_data["backendcoor"][i]["lng"]
+                        },
+                        map: map
+                    });
+                    markers.push(markerList[i]);
+
+                    windowList[i] = new google.maps.InfoWindow({
+                        content: dict_data["backendcoor"][0]["text"],
+                        maxWidth: 200
+                    });
+//
+//                        marker_new.addListener('click', function (event) {
+                    windowList[i].open(markerList[i].get('map'), markerList[i]);
+////                            map.panTo(event.latLng);
+////                        });
+                }
+            } else {
+                res2.innerHTML = "Oops, no shopping around";
+                dict_data={};
+            }
+        };
+        req_coor.open('POST', '/', true);
+        req_coor.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+        req_coor.send("lat="+data_received['lat']+"&"+"lng="+data_received['lng']+"&"+"check=true");
+
+        return dict_data;
+    }
+
 </script>
+<div id="txt">
+    <p id="result" class = "tt2">The Lat and Lng of the clicked point</p>
+    <p id="result2" class = "tt2">Shopping Mall Information Here</p>
+</div>
 <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAuy5-bTczo1PYVkSlLdIDVqB5LF1Ibyow&callback=initMap">
 </script>
