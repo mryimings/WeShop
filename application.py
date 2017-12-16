@@ -6,13 +6,13 @@ from requests_aws4auth import AWS4Auth
 application = Flask(__name__)
 application.secret_key = 'super secret key'
 
-AWS_ACCESS_KEY = '这里要改'
-AWS_SECRET_KEY = '这里也要改'
+AWS_ACCESS_KEY = '中国'
+AWS_SECRET_KEY = '印度'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-这里依然要改-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
+host = 'search-美国-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
 
 es = Elasticsearch(
     hosts=[{'host': host, 'port': 443}],
@@ -76,6 +76,16 @@ def signup():
             return redirect('/homepage')
     return render_template('signup.html')
 
+@application.route('/maineventstatus', methods=['GET', 'POST'])
+def main_event_status():
+    main_event_status_form = request.form.to_dict()
+    print main_event_status_form
+    if request.method == 'GET':
+        pass
+    elif request.method == 'POST':
+        pass
+    return render_template('main_event_status.html')
+
 @application.route("/homepage", methods=['GET', 'POST'])
 def homepage():
     signup_form = request.form.to_dict()
@@ -119,7 +129,6 @@ def viewfriends():
 @application.route("/addfriends", methods=['GET', 'POST'])
 def add_friend():
     if request.method == 'GET':
-
         all_users = es.search(index='users', body={"query": {"match_all": {}}})['hits']['hits']
         # print all_users
         userId_list = []
@@ -150,6 +159,7 @@ def add_friend():
         return render_template('homepage.html')
     return render_template("AddFriends.html")
 
+
 @application.route("/create_event", methods=['GET', 'POST'])
 def create_event():
     event_form = request.form.to_dict()
@@ -166,9 +176,9 @@ def create_event():
     if request.method == 'POST':
         if 'curr_userid' in session:
             curr_user = session['curr_userid']
-        members = event_form['memberlist']
-        print members
-        print type(members)
+        members = request.form.getlist('memberlist')
+        # print members
+        # print type(members)
         members2 = []
         friend_members = []
         all_users = es.search(index='users', body={"query": {"match_all": {}}})['hits']['hits']
@@ -203,5 +213,7 @@ def create_event():
 
 if __name__ == '__main__':
     application.run()
+
+#     print es.get(index='events', doc_type='default', id='hys')
 
 
