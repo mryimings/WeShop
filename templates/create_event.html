@@ -32,20 +32,35 @@
     <form action="create_event" method="POST" name="create_event">
         <table border="1">
             <tr>
-                <td>Event Name:</td><td><input type="text" name="eventname"></td>
+                <td>Event Name:</td><td><input type="text" name="eventName"></td>
+            </tr>
+            <tr>
+                <td>Time:</td><td><input type="text" name="eventTime"></td>
             </tr>
             <tr>
               <td>send invitation to:</td>
               <td>
 
-        {% for n in friend %}
-              <table>
-                  <td>{{n[0]}}</td>
-                  <td>{{n[1]}}</td>
-                  <td>{{n[2]}}</td>
-                  <td>add<input   type="checkbox"   value="add"   name="n[0]"   checked="checked"/></td>
+              <table border="1">
+                  {% for n in friend %}
+                  <tr>
+
+                      <td>{{n[0]}}</td>
+                      <td>{{n[1]}}</td>
+                      <td>{{n[2]}}</td>
+
+                      <td>add<input   type="checkbox"   value="n[0]"   name="memberlist"   checked="checked"/></td>
+
+                  </tr>
+                  {% endfor %}
+                  <tr>
+                      <td>All strangers</td>
+                      <td> </td>
+                      <td> </td>
+                      <td>add<input   type="checkbox"   value="alluser"   name="memberlist"   checked="checked"/></td>
+                  </tr>
               </table>
-         {% endfor %}
+
               </td>
           </tr>
           <tr>
