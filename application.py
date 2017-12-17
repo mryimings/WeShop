@@ -6,8 +6,8 @@ from requests_aws4auth import AWS4Auth
 application = Flask(__name__)
 application.secret_key = 'super secret key'
 
-AWS_ACCESS_KEY = 'i'
-AWS_SECRET_KEY = 'j+Ye7w47iCaBUsJYtwF'
+AWS_ACCESS_KEY = 'h'
+AWS_SECRET_KEY = 'l'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
@@ -77,7 +77,7 @@ def signup():
             return redirect('/homepage')
     return render_template('signup.html')
 
-@application.route('/maineventstatus', methods=['GET', 'POST'])
+@application.route('/main_event_status', methods=['GET', 'POST'])
 def main_event_status():
     main_event_status_form = request.form.to_dict()
     print main_event_status_form
@@ -258,10 +258,31 @@ def create_event():
         return redirect('/homepage')
     return render_template('create_event.html')
 
+@application.route('/event_status_detail', methods=['GET', 'POST'])
+def event_status_detail():
+    if request.method == 'GET':
+        curr_user = ''
+        if 'curr_userid' in session:
+            curr_user = session['curr_userid']
+        all_events = es.search(index='events', body={"query": {"match_all":{}}})['hits']['hits']
+        return_list = []
+        for event in all_events:
+            if event['_source']['event_host'] == curr_user:
+                curr_dict = {}
+                curr_dict['event_name'] = event['_id']
+                curr_dict['event_time'] = event['_source']['event_time']
+                curr_dict['event_location'] = event['_source']['location']
+                curr_dict['event_member_status'] = {'pending':[], 'accepted':[], 'declined':[]}
+                for member in event['_source']['member_list']:
+                    if member in event['_source']['pending_member_list']:
+                        curr_dict['event_member_status']['pending'].append(member)
+                    elif member in event['_source']['accepted_member_list']:
+                        curr_dict['event_member_status']['accepted'].append(member)
+                    else:
+                        curr_dict['event_member_status']['declined'].append(member)
+                return_list.append(curr_dict)
+    return render_template('event_status_detail.html', **dict(alldata=return_list))
+
 
 if __name__ == '__main__':
     application.run()
-
-#     print es.get(index='events', doc_type='default', id='hys')
-
-
