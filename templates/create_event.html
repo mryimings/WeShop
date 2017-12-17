@@ -67,7 +67,12 @@
               <td> <input type="submit" value="SendInvitation" name="Send Invitation" id="SendInvitation"></td>
           </tr>
         </table>
+         <p>Click <a href="/homepage">here</a> to go home.</p>
+
     </form>
+    {% if error %}
+         <p class="error"><strong>Error:</strong>{{error}}
+    {% endif %}
 </div>
 <div id="map"></div>
 <script>
