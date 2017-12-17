@@ -324,9 +324,9 @@ def event_status_detail():
 
 @application.route('/logout',methods=['GET','POST'])
 def logout():
-     if 'curr_userid' in session:
-        session['curr_userid'] = null
-        return render_template('weshop.html')
+    if 'curr_userid' in session:
+        session['curr_userid'] = None
+    return render_template('weshop.html')
 
 if __name__ == '__main__':
     application.run()
