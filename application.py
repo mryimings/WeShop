@@ -1,6 +1,7 @@
 from flask import *
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
+from subprocess import *
 
 application = Flask(__name__)
 application.secret_key = 'super secret key'
@@ -232,7 +233,7 @@ def create_event():
         if 'check' in coor and coor['check'] == 'true':
             lat = coor["lat"]
             lng = coor["lng"]
-            query = "curl -XGET https://search-shoppingmall-qneri4bfel2dfgjpqq453wilcq.us-east-1.es.amazonaws.com/shoppingmall2/location/_search -d" + " '" + '{"query":{"bool":{"must":{"match_all":{}},"filter":{"geo_distance":{"distance":"3km","pin.location":{"lat":' + str(
+            query = "curl -XGET https://search-shoppingmall-qneri4bfel2dfgjpqq453wilcq.us-east-1.es.amazonaws.com/shoppingmall2/location/_search -d" + " '" + '{"query":{"bool":{"must":{"match_all":{}},"filter":{"geo_distance":{"distance":"1km","pin.location":{"lat":' + str(
                 lat) + ',"lon":' + str(lng) + '}}}}}}' + "'" + " -H 'Content-Type: application/json'"
             # print query
 
@@ -324,9 +325,9 @@ def event_status_detail():
 
 @application.route('/logout',methods=['GET','POST'])
 def logout():
-     if 'curr_userid' in session:
-        session['curr_userid'] = null
-        return render_template('weshop.html')
+    if 'curr_userid' in session:
+        session['curr_userid'] = None
+    return render_template('weshop.html')
 
 if __name__ == '__main__':
     application.run()
