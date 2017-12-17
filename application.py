@@ -6,13 +6,13 @@ from requests_aws4auth import AWS4Auth
 application = Flask(__name__)
 application.secret_key = 'super secret key'
 
-AWS_ACCESS_KEY = 'h'
-AWS_SECRET_KEY = 'l'
+AWS_ACCESS_KEY = 'AKIAI5IAZY4OQQIBW3ZA'
+AWS_SECRET_KEY = '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'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-test-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
+host = 'search-weshop-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
 
 
 es = Elasticsearch(
@@ -89,13 +89,18 @@ def main_event_status():
         host_events = []
         pending_events = []
         accepted_events = []
+        print all_events
         for event in all_events:
+            print event['_id']
             if curr_user == event['_source']['event_host']:
                 host_events.append(event['_id'])
             elif curr_user in event['_source']['pending_member_list']:
                 pending_events.append([event['_id'], event['_source']['location'], event['_source']['event_time']])
             elif curr_user in event['_source']['accepted_member_list']:
                 accepted_events.append(event['_id'])
+        print host_events
+        print pending_events
+        print accepted_events
         return render_template('main_event_status.html', **dict(host=host_events, pending=pending_events, accepted=accepted_events))
     elif request.method == 'POST':
         decision_dict = request.form.to_dict()
@@ -286,3 +291,7 @@ def event_status_detail():
 
 if __name__ == '__main__':
     application.run()
+    # print es.get(index='events', doc_type='default', id='haha')
+
+    # es.delete_by_query(index='events', body={'query':{'match_all':{}}})
+    # es.delete_by_query(index='users', body={'query': {'match_all': {}}})
