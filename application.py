@@ -1,6 +1,7 @@
 from flask import *
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
+from subprocess import *
 
 application = Flask(__name__)
 application.secret_key = 'super secret key'
