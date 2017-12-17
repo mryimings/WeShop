@@ -4,6 +4,7 @@ from requests_aws4auth import AWS4Auth
 
 
 
+
 application = Flask(__name__)
 application.secret_key = 'super secret key'
 
@@ -13,7 +14,7 @@ region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-test-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # # For example, my-test-domain.us-east-1.es.amazonaws.com
+host = 'search-test-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  #
 
 
 es = Elasticsearch(
@@ -66,12 +67,7 @@ def signup():
             user_information['firstname'] = signup_form['firstname']
             user_information['lastname'] = signup_form['lastname']
             user_information['phone'] = signup_form['phone']
-            user_information['address'] = signup_form['building']
-            user_information['friends'] = []
-            user_information['invited_events'] = []
-            user_information['attending_events'] = []
-            user_information['pending_friend_requests'] = []
-            user_information['pending_sent_requests'] = []
+            user_information['address'] = signup_form['building'] + "," + signup_form['street'] + "," + signup_form['city'] + "," + signup_form['state'] + "," + signup_form['zipcode']
             es.index(index="users", doc_type="default", id=signup_form['userId'], body=user_information)
             print es.get(index='users', doc_type='default', id=signup_form['userId'])
             session['curr_userid'] = signup_form['userId']
