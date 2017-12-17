@@ -6,13 +6,14 @@ from requests_aws4auth import AWS4Auth
 application = Flask(__name__)
 application.secret_key = 'super secret key'
 
-AWS_ACCESS_KEY = '中国'
-AWS_SECRET_KEY = '印度'
+AWS_ACCESS_KEY = 'i'
+AWS_SECRET_KEY = 'j+Ye7w47iCaBUsJYtwF'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-美国-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
+host = 'search-test-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
+
 
 es = Elasticsearch(
     hosts=[{'host': host, 'port': 443}],
@@ -124,43 +125,57 @@ def homepage():
 @application.route("/viewfriendrequests", methods=['GET', 'POST'])
 def viewfriendrequests():
     if request.method == 'GET':
+        userId_list = []
         if 'curr_userid' in session:
           curr_user = session['curr_userid']
         pending_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['pending_friend_requests']
-        for user in all_users:
-            if user not in pending_friend_list:
-                userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
+        print pending_friend_list
+        for user in pending_friend_list:
+            print(user)
+            friendreq = es.get(index='users', doc_type='default', id=user)
+            userId_list.append([friendreq['_id'], friendreq['_source']['firstname'], friendreq['_source']['lastname'], friendreq['_source']['phone']])
         return render_template("ViewPendingFriendRequest.html", **dict(data=userId_list))
     if request.method == 'POST':
         friendIds = request.form.getlist('FriendId')
         if 'curr_userid' in session:
-          curr_user = session['curr_userid']
+            curr_user = session['curr_userid']
         for userId in friendIds:
             user_info = es.get(index='users', doc_type='default', id=userId)['_source']
             user_info['friends'].append(curr_user)
+            if curr_user in user_info['pending_sent_requests']:
+                user_info['pending_sent_requests'].remove(curr_user)
             es.index(index='users', doc_type='default', id=userId, body=user_info)
-        user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
-        print(user_info)
+
+            user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
+            user_info['friends'].append(userId)
+            if userId in user_info['pending_friend_requests']:
+                user_info['pending_friend_requests'].remove(userId)
+            es.index(index='users', doc_type='default', id=curr_user, body=user_info)
         return render_template('homepage.html')
 
 @application.route("/viewfriends", methods=['GET', 'POST'])
 def viewfriends():
+    userId_list = []
     if request.method == 'GET':
         if 'curr_userid' in session:
           curr_user = session['curr_userid']
           friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
         for user in friend_list:
-             userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname'], user['_source']['phone']])
-        return render_template("FriendList.html", **dict(data=friend_list))
+             friend = es.get(index='users', doc_type='default', id=user)
+             userId_list.append([friend['_id'], friend['_source']['firstname'], friend['_source']['lastname'], friend['_source']['phone']])
+        return render_template("FriendList.html", **dict(data=userId_list))
    
 @application.route("/addfriends", methods=['GET', 'POST'])
 def add_friend():
     if request.method == 'GET':
+       
         all_users = es.search(index='users', body={"query": {"match_all": {}}})['hits']['hits']
         # print all_users
         userId_list = []
         if 'curr_userid' in session:
             curr_user = session['curr_userid']
+        curr_pend = es.get(index='users', doc_type='default', id=curr_user)['_source']['pending_sent_requests']
+        print curr_pend
         curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
         curr_pending = es.get(index='users', doc_type='default', id=curr_user)['_source']['pending_sent_requests']
         for user in all_users:
