@@ -231,13 +231,13 @@ def create_event():
             return render_template('create_event.html', error='event already exists')
         event_information['event_time'] = event_form['eventTime']
         event_information['event_host'] = curr_user
-        event_information['location'] = []
+        event_information['location'] = 'somewhere'
         event_information['accepted_member_list'] = []
         print 'linyihan'
         if members[-1] == "alluser":
             for i in range(len(members) - 1):
                 friend_members.append(members[i])
-            members2 = [x for x in friend_members]
+            members2 = [friend_members[i] for i in range(len(friend_members)-1)]
             for user in all_users:
                 user = user['_id']
                 if user not in curr_friend_list:
@@ -247,36 +247,16 @@ def create_event():
         else:
             event_information['pending_member_list'] = members
         event_information['member_list'] = event_information['pending_member_list']
-
         es.index(index="events", doc_type="default", id=event_form['eventName'], body=event_information)
+
+        for invited_user in event_information['member_list']:
+            invited_user_body = es.get(index='users', doc_type='default', id=invited_user)['_source']
+            invited_user_body['invited_events'].append(event_information['event_name'])
+            es.index(index='users', doc_type='default', id=invited_user)
+
         print es.get(index='events', doc_type='default', id=event_form['eventName'])
         return redirect('/homepage')
     return render_template('create_event.html')
-
-@application.route('/eventstatusdetial', methods=['GET', 'POST'])
-def event_status_detail():
-    if request.method == 'GET':
-        curr_user = ''
-        if 'curr_userid' in session:
-            curr_user = session['curr_userid']
-        all_events = es.search(index='events', body={"query": {"match_all":{}}})['hits']['hits']
-        return_list = []
-        for event in all_events:
-            if event['_source']['event_host'] == curr_user:
-                curr_dict = {}
-                curr_dict['event_name'] = event['_id']
-                curr_dict['event_time'] = event['_source']['event_time']
-                curr_dict['event_location'] = event['_source']['location']
-                curr_dict['event_member_status'] = {'pending':[], 'accepted':[], 'declined':[]}
-                for member in event['_source']['member_list']:
-                    if member in event['_source']['pending_member_list']:
-                        curr_dict['event_member_status']['pending'].append(member)
-                    elif member in event['_source']['accepted_member_list']:
-                        curr_dict['event_member_status']['accepted'].append(member)
-                    else:
-                        curr_dict['event_member_status']['declined'].append(member)
-                return_list.append(curr_dict)
-    return render_template('event_status_detail.html', **dict(data=curr_dict))
 
 
 if __name__ == '__main__':
