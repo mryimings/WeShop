@@ -233,7 +233,7 @@ def create_event():
         if 'check' in coor and coor['check'] == 'true':
             lat = coor["lat"]
             lng = coor["lng"]
-            query = "curl -XGET https://search-shoppingmall-qneri4bfel2dfgjpqq453wilcq.us-east-1.es.amazonaws.com/shoppingmall2/location/_search -d" + " '" + '{"query":{"bool":{"must":{"match_all":{}},"filter":{"geo_distance":{"distance":"3km","pin.location":{"lat":' + str(
+            query = "curl -XGET https://search-shoppingmall-qneri4bfel2dfgjpqq453wilcq.us-east-1.es.amazonaws.com/shoppingmall2/location/_search -d" + " '" + '{"query":{"bool":{"must":{"match_all":{}},"filter":{"geo_distance":{"distance":"1km","pin.location":{"lat":' + str(
                 lat) + ',"lon":' + str(lng) + '}}}}}}' + "'" + " -H 'Content-Type: application/json'"
             # print query
 
