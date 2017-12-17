@@ -6,13 +6,13 @@ from subprocess import *
 application = Flask(__name__)
 application.secret_key = 'super secret key'
 
-AWS_ACCESS_KEY = 'i'
-AWS_SECRET_KEY = 'j'
+AWS_ACCESS_KEY = 'AKIAJ2GEVNZUURTUZMYA'
+AWS_SECRET_KEY = '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'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-test-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  #
+host = 'search-weshop-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  #
 
 
 es = Elasticsearch(
@@ -271,7 +271,7 @@ def create_event():
             return render_template('create_event.html', error='event already exists')
         event_information['event_time'] = event_form['eventTime']
         event_information['event_host'] = curr_user
-        event_information['location'] = 'somewhere'
+        event_information['location'] = event_form['location']
         event_information['accepted_member_list'] = []
         # print 'linyihan'
         if members[-1] == "alluser":
