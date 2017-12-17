@@ -224,7 +224,7 @@ def create_event():
             curr_user = session['curr_userid']
         curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
         for user in curr_friend_list:
-            user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
+            user_info = es.get(index='users', doc_type='default', id=user)['_source']
             userId_list.append([user_info['userId'], user_info['firstname'], user_info['lastname']])
         return render_template("create_event.html", **dict(friend=userId_list))
     if request.method == 'POST':
