@@ -252,7 +252,7 @@ def create_event():
         for invited_user in event_information['member_list']:
             invited_user_body = es.get(index='users', doc_type='default', id=invited_user)['_source']
             invited_user_body['invited_events'].append(event_information['event_name'])
-            es.index(index='users', doc_type='default', id=invited_user)
+            es.index(index='users', doc_type='default', id=invited_user, body=invited_user_body)
 
         print es.get(index='events', doc_type='default', id=event_form['eventName'])
         return redirect('/homepage')
