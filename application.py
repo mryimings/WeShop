@@ -94,26 +94,34 @@ def main_event_status():
             elif curr_user in event['_source']['pending_member_list']:
                 pending_events.append([event['_id'], event['_source']['location'], event['_source']['event_time']])
             elif curr_user in event['_source']['accepted_member_list']:
-                accepted_events.append(event['_id'])
+                accepted_events.append([event['_id'], event['_source']['location'], event['_source']['event_time']])
         print host_events
         print pending_events
         print accepted_events
         return render_template('main_event_status.html', **dict(host=host_events, pending=pending_events, accepted=accepted_events))
     elif request.method == 'POST':
         decision_dict = request.form.to_dict()
-        print decision_dict
+        # print "decision:", decision_dict
         curr_user = ''
         if 'curr_userid' in session:
             curr_user = session['curr_userid']
         curr_user_info = es.get(index='users', doc_type='default', id=curr_user)['_source']
         for event_id in decision_dict:
-            curr_user_info['invited_events'].remove(event_id)
-            curr_event_info = es.get(index='events', doc_type='default', id=event_id)['_source']
-            curr_event_info['pending_member_list'].remove(curr_user)
-            if decision_dict[event_id] == 'yes':
-                curr_user_info['attending_events'].append(event_id)
-                curr_event_info['accepted_member_list'].append(curr_user)
+            if event_id != 'eventDecision':
+                # print event_id, curr_user
+                # print curr_user_info['invited_events']
 
+                curr_user_info['invited_events'].remove(event_id)
+                curr_event_info = es.get(index='events', doc_type='default', id=event_id)['_source']
+                # print curr_event_info['pending_member_list']
+                curr_event_info['pending_member_list'].remove(curr_user)
+                if decision_dict[event_id] == 'yes':
+                    curr_user_info['attending_events'].append(event_id)
+                    curr_event_info['accepted_member_list'].append(curr_user)
+                # print 'seems no error!'
+
+                es.index(index='events', doc_type='default', id=event_id, body=curr_event_info)
+        es.index(index='users', doc_type='default', id=curr_user, body=curr_user_info)
     return render_template('main_event_status.html')
 
 @application.route("/homepage", methods=['GET', 'POST'])
@@ -177,7 +185,7 @@ def add_friend():
         if 'curr_userid' in session:
             curr_user = session['curr_userid']
         curr_pend = es.get(index='users', doc_type='default', id=curr_user)['_source']['pending_sent_requests']
-        print curr_pend
+        # print curr_pend
         curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
         curr_pending = es.get(index='users', doc_type='default', id=curr_user)['_source']['pending_sent_requests']
         for user in all_users:
@@ -197,9 +205,9 @@ def add_friend():
             user_info['pending_friend_requests'].append(curr_user)
             curr_user_info['pending_sent_requests'].append(userId)
             es.index(index='users', doc_type='default', id=userId, body=user_info)
-        print curr_user_info['pending_sent_requests']
+        # print curr_user_info['pending_sent_requests']
         es.index(index='users', doc_type='default', id=curr_user, body=curr_user_info)
-        print "hhah"
+        # print "hhah"
         return render_template('homepage.html')
     return render_template("AddFriends.html")
 
@@ -207,7 +215,7 @@ def add_friend():
 @application.route("/create_event", methods=['GET', 'POST'])
 def create_event():
     event_form = request.form.to_dict()
-    print event_form
+    # print event_form
     if request.method == 'GET':
         userId_list = []
         if 'curr_userid' in session:
@@ -215,9 +223,36 @@ def create_event():
         curr_friend_list = es.get(index='users', doc_type='default', id=curr_user)['_source']['friends']
         for user in curr_friend_list:
             userId_list.append([user['_id'], user['_source']['firstname'], user['_source']['lastname']])
-        print "ha"
+        # print "ha"
         return render_template("create_event.html", **dict(friend=userId_list))
     if request.method == 'POST':
+        coor = request.form.to_dict()
+        if 'check' in coor and coor['check'] == 'true':
+            lat = coor["lat"]
+            lng = coor["lng"]
+            query = "curl -XGET https://search-shoppingmall-qneri4bfel2dfgjpqq453wilcq.us-east-1.es.amazonaws.com/shoppingmall2/location/_search -d" + " '" + '{"query":{"bool":{"must":{"match_all":{}},"filter":{"geo_distance":{"distance":"3km","pin.location":{"lat":' + str(
+                lat) + ',"lon":' + str(lng) + '}}}}}}' + "'" + " -H 'Content-Type: application/json'"
+            # print query
+
+            t = Popen(query, shell=True, stdout=PIPE)
+            text = t.communicate()[0]
+            # print text
+            tmp = json.loads(text)
+            malls = json.loads(text)["hits"]["hits"]
+            data = []
+            for mall in malls:
+                item = dict()
+                item["name"] = mall["_source"]["name"]
+                if "rating" in mall["_source"]["content"]:
+                    item["rating"] = mall["_source"]["content"]["rating"]
+                if "price_level" in mall["_source"]["content"]:
+                    item["price_level"] = mall["_source"]["content"]["rating"]
+                item["location"] = mall["_source"]["pin"]["location"]
+                data.append(item)
+
+            # print json.dumps(data, indent=4)
+            result = json.dumps(data)
+            return result
         if 'curr_userid' in session:
             curr_user = session['curr_userid']
         members = request.form.getlist('memberlist')
@@ -235,7 +270,7 @@ def create_event():
         event_information['event_host'] = curr_user
         event_information['location'] = 'somewhere'
         event_information['accepted_member_list'] = []
-        print 'linyihan'
+        # print 'linyihan'
         if members[-1] == "alluser":
             for i in range(len(members) - 1):
                 friend_members.append(members[i])
@@ -256,7 +291,7 @@ def create_event():
             invited_user_body['invited_events'].append(event_information['event_name'])
             es.index(index='users', doc_type='default', id=invited_user, body=invited_user_body)
 
-        print es.get(index='events', doc_type='default', id=event_form['eventName'])
+        # print es.get(index='events', doc_type='default', id=event_form['eventName'])
         return redirect('/homepage')
     return render_template('create_event.html')
 
