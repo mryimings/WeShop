@@ -6,13 +6,13 @@ from subprocess import *
 application = Flask(__name__)
 application.secret_key = 'super secret key'
 
-AWS_ACCESS_KEY = 'AKIAJ2GEVNZUURTUZMYA'
-AWS_SECRET_KEY = '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'
+AWS_ACCESS_KEY = 'i'
+AWS_SECRET_KEY = 'kj'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-weshop-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  #
+host = 'search-test-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  #
 
 
 es = Elasticsearch(
@@ -113,11 +113,12 @@ def main_event_status():
             if event_id != 'eventDecision':
                 # print event_id, curr_user
                 # print curr_user_info['invited_events']
-
-                curr_user_info['invited_events'].remove(event_id)
+                if event_id in curr_user_info['invited_events']:
+                     curr_user_info['invited_events'].remove(event_id)
                 curr_event_info = es.get(index='events', doc_type='default', id=event_id)['_source']
                 # print curr_event_info['pending_member_list']
-                curr_event_info['pending_member_list'].remove(curr_user)
+                if curr_user in curr_event_info['pending_member_list']:
+                  curr_event_info['pending_member_list'].remove(curr_user)
                 if decision_dict[event_id] == 'yes':
                     curr_user_info['attending_events'].append(event_id)
                     curr_event_info['accepted_member_list'].append(curr_user)
