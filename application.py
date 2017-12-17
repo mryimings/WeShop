@@ -3,16 +3,17 @@ from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 
 
+
 application = Flask(__name__)
 application.secret_key = 'super secret key'
 
 AWS_ACCESS_KEY = 'i'
-AWS_SECRET_KEY = 'h'
+AWS_SECRET_KEY = 'j'
 region = 'us-east-1'
 
 awsauth = AWS4Auth(AWS_ACCESS_KEY, AWS_SECRET_KEY, region, 'es')
 
-host = 'search-test-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # For example, my-test-domain.us-east-1.es.amazonaws.com
+host = 'search-test-tdsvvvhq4bobx7kcxq6jkaah6y.us-east-1.es.amazonaws.com'  # # For example, my-test-domain.us-east-1.es.amazonaws.com
 
 
 es = Elasticsearch(
@@ -288,6 +289,11 @@ def event_status_detail():
                 return_list.append(curr_dict)
     return render_template('event_status_detail.html', **dict(alldata=return_list))
 
+@application.route('/logout',methods=['GET','POST'])
+def logout():
+     if 'curr_userid' in session:
+        session['curr_userid'] = null
+        return render_template('weshop.html')
 
 if __name__ == '__main__':
     application.run()
