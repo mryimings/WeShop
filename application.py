@@ -253,6 +253,32 @@ def create_event():
         return redirect('/homepage')
     return render_template('create_event.html')
 
+@application.route('/eventstatusdetial', methods=['GET', 'POST'])
+def event_status_detail():
+    if request.method == 'GET':
+        curr_user = ''
+        if 'curr_userid' in session:
+            curr_user = session['curr_userid']
+        all_events = es.search(index='events', body={"query": {"match_all":{}}})['hits']['hits']
+        return_list = []
+        for event in all_events:
+            if event['_source']['event_host'] == curr_user:
+                curr_dict = {}
+                curr_dict['event_name'] = event['_id']
+                curr_dict['event_time'] = event['_source']['event_time']
+                curr_dict['event_location'] = event['_source']['location']
+                curr_dict['event_member_status'] = {'pending':[], 'accepted':[], 'declined':[]}
+                for member in event['_source']['member_list']:
+                    if member in event['_source']['pending_member_list']:
+                        curr_dict['event_member_status']['pending'].append(member)
+                    elif member in event['_source']['accepted_member_list']:
+                        curr_dict['event_member_status']['accepted'].append(member)
+                    else:
+                        curr_dict['event_member_status']['declined'].append(member)
+                return_list.append(curr_dict)
+    return render_template('event_status_detail.html', **dict(data=curr_dict))
+
+
 if __name__ == '__main__':
     application.run()
 
