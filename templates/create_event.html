@@ -76,15 +76,18 @@
 </div>
 <div id="map"></div>
 <script>
+    var map;
+    var markerList = [];
     function initMap() {
         var newyork = {lat: 40.8075355, lng: -73.96257270000001};
-        var map = new google.maps.Map(document.getElementById('map'), {
+        map = new google.maps.Map(document.getElementById('map'), {
             zoom: 12,
             center: newyork
         });
         map.addListener('click', function(event) {
             coor = {"lat": event.latLng.lat(),"lng":event.latLng.lng()};
             send_coor(coor);
+            map.panTo(event.latLng);
             var res1 = document.getElementById('result');
             res1.innerHTML = JSON.stringify(coor);
         });
@@ -92,43 +95,62 @@
 
     function send_coor(data_received) {
         var req_coor = new XMLHttpRequest();
-
+        var dict_data = {};
         var res2 = document.getElementById('result2');
-        var dict_data={};
+        
         req_coor.onreadystatechange = function()
         {
             if(this.readyState == 4 && this.status == 200) {
                 var resText = this.responseText;
                 dict_data = JSON.parse(resText);
-                res2.innerHTML = JSON.stringify(dict_data);
-                var markerList = new Array(dict_data["backendcoor"].length);
-                var windowList = new Array(dict_data["backendcoor"].length);
-                for(var i = 0;i<dict_data["backendcoor"].length;i++) {
-                    markerList[i] = new google.maps.Marker({
+                for (var j = 0; j < markerList.length; j++) {
+                    markerList[j].setMap(null);
+                }
+                markerList = [];
+
+                var windowList = new Array(dict_data.length);
+                var mallname = [];
+                res2.innerHTML = "We are Adding Makers";
+                for(var i = 0; i < dict_data.length; i++) {
+                    mallname.push(dict_data[i]["name"]);
+                    // res2.innerHTML = dict_data[i]["location"]["lat"];
+                    var marker = new google.maps.Marker({
                         position: {
-                            lat: dict_data["backendcoor"][i]["lat"],
-                            lng: dict_data["backendcoor"][i]["lng"]
+                            lat: dict_data[i]["location"]["lat"],
+                            lng: dict_data[i]["location"]["lon"]
                         },
                         map: map
                     });
-                    markers.push(markerList[i]);
+                    marker.setMap(map);
+                    markerList.push(marker);
+                    // res2.innerHTML = "We are in a loop";
+                    var shoppingmallcontent;
+                    shoppingmallcontent = "<p>Shopping Mall: " + JSON.stringify(dict_data[i]["name"])+"</p>";
+                    if (dict_data[i].hasOwnProperty("rating")) {
+                        shoppingmallcontent += "<p>Rating: " + JSON.stringify(dict_data[i]["rating"])+"</p>";
+                    }
+                    if (dict_data[i].hasOwnProperty("price_level")) {
+                        shoppingmallcontent += "<p>Price Level: " + JSON.stringify(dict_data[i]["rating"])+"</p>";
+                    }
 
-                    windowList[i] = new google.maps.InfoWindow({
-                        content: dict_data["backendcoor"][0]["text"],
-                        maxWidth: 200
+                    var infowindow = new google.maps.InfoWindow({
+                        maxWidth:300
                     });
-//
-//                        marker_new.addListener('click', function (event) {
-                    windowList[i].open(markerList[i].get('map'), markerList[i]);
-////                            map.panTo(event.latLng);
-////                        });
+                    google.maps.event.addListener(markerList[i], 'mouseover', (function(marker, content) {
+                        return function() {
+                            infowindow.setContent(content);
+                            infowindow.open(map, marker);
+                        }
+                    })(marker, shoppingmallcontent));
+
                 }
+                res2.innerHTML = JSON.stringify(mallname);
             } else {
-                res2.innerHTML = "Oops, no shopping around";
+                // res2.innerHTML = "Oops, no shopping around";
                 dict_data={};
             }
         };
-        req_coor.open('POST', '/', true);
+        req_coor.open('POST', '/create_event', true);
         req_coor.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
         req_coor.send("lat="+data_received['lat']+"&"+"lng="+data_received['lng']+"&"+"check=true");
 
@@ -148,3 +170,4 @@
     <p>© 2017 WeShop. All rights reserved.</p>
 </footer>
 </html>
+
