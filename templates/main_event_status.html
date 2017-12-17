@@ -1,0 +1,77 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <form action="main_event_status" method="POST" name="main_event_status">
+  <p>Events status</p>
+  <div>
+      <td>Events host by you:</td>
+      <table border="1">
+
+        {% for n in host %}
+        <tr>
+            <td>{{n}}</td>
+        </tr>
+        {% endfor %}
+        <td><a href="/event_status_detail">See detail</a></td>
+      </table>
+  </div>
+
+
+  <div>
+      <td>Invitations:</td>
+      <table border="1">
+          <tr>
+              <td><input type="submit" value="confirm" name="eventDecision"></td>
+          </tr>
+          <tr>
+              <td>Event Name</td>
+              <td>Location</td>
+              <td>Time</td>
+              <td>Accept/Decline</td>
+          </tr>
+          {% for n in pending %}
+          <tr>
+            <td>{{n[0]}}</td>
+            <td>{{n[1]}}</td>
+            <td>{{n[3]}}</td>
+            <td>
+                <select name = {{n[0]}}>
+                    <option value="yes">accept</option>
+                    <option value="no">decline</option>
+                </select>
+            </td>
+          </tr>
+          {% endfor %}
+      </table>
+  </div>
+
+  <div>
+      <td>Accepted event:</td>
+      <table border="1">
+          <tr>
+              <td>Event Name</td>
+              <td>Location</td>
+              <td>Time</td>
+          </tr>
+          {% for n in accepted %}
+          <tr>
+            <td>{{n[0]}}</td>
+            <td>{{n[1]}}</td>
+            <td>{{n[3]}}</td>
+          </tr>
+          {% endfor %}
+      </table>
+  </div>
+
+<p><a href="/create_event.html">Create another event</a></p>
+
+</form>
+</body>
+</html>

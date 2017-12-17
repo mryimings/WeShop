@@ -1,0 +1,88 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <form method="post" name="AddFriends">
+      <p>Event detail</p>
+
+
+  <div>
+    <table border="1">
+
+    {% for n in alldata %}
+        <table border="1">
+        <tr>
+            <tr>
+            <td>Event Name</td>
+            <td>{{n.event_name}}</td>
+            </tr>
+
+            <tr>
+            <td>Event Timd</td>
+            <td>{{n.event_time}}</td>
+            </tr>
+
+            <tr>
+            <td>Event Location</td>
+            <td>{{n.event_location}}</td>
+            </tr>
+
+            <tr>
+                <td>Member Status</td>
+                <td>
+                <table border="1">
+                    <tr>
+                        <td>pending:</td>
+                        <td>
+                            {% for m in n.event_member_status.pending %}
+                            <table border="1">
+                                <tr><tb>{{m}}</tb></tr>
+
+                            </table>
+                            {%endfor%}
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>accepted:</td>
+                        <td>
+                            <table border="1">
+                            {% for m in n.event_member_status.accepted %}
+                                <tr><tb>{{m}}</tb></tr>
+                            {%endfor%}
+                            </table>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>declined:</td>
+                        <td>
+                            <table border="1">
+                            {% for m in n.event_member_status.declined %}
+                                <tr><tb>{{m}}</tb></tr>
+                            {%endfor%}
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+                </td>
+
+            </tr>
+        </tr>
+        </table>
+    {% endfor %}
+
+
+    </table>
+  </div>
+
+</form>
+</body>
+</html>
