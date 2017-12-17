@@ -68,6 +68,11 @@ def signup():
             user_information['lastname'] = signup_form['lastname']
             user_information['phone'] = signup_form['phone']
             user_information['address'] = signup_form['building'] + "," + signup_form['street'] + "," + signup_form['city'] + "," + signup_form['state'] + "," + signup_form['zipcode']
+            user_information['friends'] = []       
+            user_information['invited_events'] = []       
+            user_information['attending_events'] = []     
+            user_information['pending_friend_requests'] = []      
+            user_information['pending_sent_requests'] = []
             es.index(index="users", doc_type="default", id=signup_form['userId'], body=user_information)
             print es.get(index='users', doc_type='default', id=signup_form['userId'])
             session['curr_userid'] = signup_form['userId']
